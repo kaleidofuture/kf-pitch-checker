@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KF-PitchChecker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="kf-header">
+    <div class="kf-header-left">
+      <span class="kf-logo">KF</span>
+      <span class="kf-app-name" data-i18n="app_name">ピッチチェッカー</span>
+    </div>
+    <select id="lang-select" onchange="setLang(this.value)">
+      <option value="ja">日本語</option>
+      <option value="en">English</option>
+    </select>
+  </header>
+  <p class="kf-tagline" data-i18n="app_tagline">楽器練習の音程をリアルタイムで可視化</p>
+  <hr class="kf-divider">
+
+  <!-- Main Content -->
+  <main>
+    <!-- Tuner Section -->
+    <section id="tuner-section">
+      <div class="tuner-display">
+        <div class="note-display">
+          <span id="note-name" class="note-name">--</span>
+          <span id="octave" class="octave"></span>
+        </div>
+        <div class="frequency-display">
+          <span id="frequency">-- Hz</span>
+        </div>
+        <!-- Cent Meter -->
+        <div class="meter-container">
+          <div class="meter-labels">
+            <span>-50</span>
+            <span>0</span>
+            <span>+50</span>
+          </div>
+          <div class="meter-bar">
+            <div class="meter-center"></div>
+            <div class="meter-needle" id="meter-needle"></div>
+          </div>
+          <div class="cent-display">
+            <span id="cent-value">0</span> <span data-i18n="cents">セント</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn btn-primary btn-large" id="start-btn" onclick="toggleListening()">
+          <span data-i18n="start">開始</span>
+        </button>
+        <div class="reference-pitch">
+          <label data-i18n="reference_pitch">基準ピッチ</label>
+          <div class="pitch-control">
+            <button class="btn btn-outline btn-sm" onclick="adjustReference(-1)">-</button>
+            <span id="reference-value">440</span> Hz
+            <button class="btn btn-outline btn-sm" onclick="adjustReference(1)">+</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Session Section -->
+    <section id="session-section" style="display:none;">
+      <h3 data-i18n="session_title">練習セッション</h3>
+      <div class="session-stats">
+        <div class="stat">
+          <span class="stat-label" data-i18n="session_duration">経過時間</span>
+          <span class="stat-value" id="session-duration">0:00</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label" data-i18n="notes_detected">検出ノート数</span>
+          <span class="stat-value" id="notes-count">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label" data-i18n="avg_accuracy">平均精度</span>
+          <span class="stat-value" id="avg-accuracy">--</span>
+        </div>
+      </div>
+
+      <!-- Histogram -->
+      <div class="histogram-container">
+        <h4 data-i18n="accuracy_histogram">音程精度ヒストグラム</h4>
+        <canvas id="histogram" width="580" height="200"></canvas>
+        <div class="histogram-labels">
+          <span>-50</span>
+          <span>-25</span>
+          <span>0</span>
+          <span>+25</span>
+          <span>+50</span>
+        </div>
+      </div>
+
+      <div class="session-actions">
+        <button class="btn btn-primary" onclick="downloadCSV()" data-i18n="download_csv">CSVダウンロード</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="kf-footer">
+    <div class="footer-links">
+      <details>
+        <summary data-i18n="about_title">このアプリについて</summary>
+        <p data-i18n="about_description">楽器練習の上達が分からないという悩みを解決するピッチチェッカーです。Web Audio APIで音声をリアルタイム解析し、音名とセント単位のずれを表示します。</p>
+      </details>
+      <details>
+        <summary data-i18n="tech_title">使用技術</summary>
+        <p>HTML + CSS + JavaScript / Web Audio API / Autocorrelation Pitch Detection / Canvas API</p>
+      </details>
+      <a href="https://kaleidofuture.com" target="_blank" rel="noopener">KaleidoFuture</a>
+    </div>
+    <div class="footer-copy">KaleidoFuture — Built with AI-driven development, powered by existing libraries</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
