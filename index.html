@@ -30,6 +30,11 @@
           <span id="note-name" class="note-name">--</span>
           <span id="octave" class="octave"></span>
         </div>
+        <!-- Direction Arrow Indicator -->
+        <div class="direction-indicator" style="text-align:center; margin:8px 0;">
+          <span id="direction-arrow" style="font-size:3rem; font-weight:bold; line-height:1;">●</span>
+          <div id="direction-label" style="font-size:0.9rem; margin-top:2px;">--</div>
+        </div>
         <div class="frequency-display">
           <span id="frequency">-- Hz</span>
         </div>
@@ -56,6 +61,20 @@
           <span data-i18n="start">開始</span>
         </button>
         <p style="color:#999; font-size:0.8rem; margin:8px 0;" data-i18n="silent_mode_warning">※ iPhoneのマナーモード（消音モード）がオンの場合、正しく動作しないことがあります。</p>
+
+        <!-- Instrument Preset -->
+        <div class="instrument-preset" style="margin:12px 0;">
+          <label data-i18n="instrument_preset" style="font-weight:600; font-size:0.9rem;">楽器プリセット</label>
+          <select id="preset-select" onchange="selectPreset(this.value)" style="margin-left:8px; padding:4px 8px; border-radius:4px; border:1px solid #ccc;">
+            <option value="custom" data-i18n="preset_custom">カスタム</option>
+            <option value="clarinet_bb" data-i18n="preset_clarinet_bb">Bbクラリネット</option>
+            <option value="trumpet" data-i18n="preset_trumpet">トランペット</option>
+            <option value="flute" data-i18n="preset_flute">フルート</option>
+            <option value="oboe" data-i18n="preset_oboe">オーボエ</option>
+            <option value="tuba" data-i18n="preset_tuba">チューバ</option>
+          </select>
+        </div>
+
         <div class="reference-pitch">
           <label data-i18n="reference_pitch">基準ピッチ</label>
           <div class="pitch-control">
@@ -63,6 +82,11 @@
             <span id="reference-value">440</span> Hz
             <button class="btn btn-outline btn-sm" onclick="adjustReference(1)">+</button>
           </div>
+        </div>
+
+        <!-- Reference Tone Button -->
+        <div style="margin-top:12px;">
+          <button class="btn btn-outline" id="ref-tone-btn" onclick="toggleReferenceTone()" data-i18n="play_reference">基準音を鳴らす</button>
         </div>
       </div>
     </section>
@@ -113,7 +137,7 @@
       </details>
       <details>
         <summary data-i18n="tech_title">使用技術</summary>
-        <p>HTML + CSS + JavaScript / Web Audio API / Autocorrelation Pitch Detection / Canvas API</p>
+        <p>HTML + CSS + JavaScript / Web Audio API / OscillatorNode / Autocorrelation Pitch Detection / Canvas API</p>
       </details>
       <a href="https://kaleidofuture.com" target="_blank" rel="noopener">KaleidoFuture</a>
     </div>
