@@ -23,6 +23,7 @@ const I18N = {
     tech_title: "使用技術",
     mic_error: "マイクにアクセスできません。ブラウザの設定を確認してください。",
     mic_prompt: "マイクへのアクセスを許可してください",
+    silent_mode_warning: "※ iPhoneのマナーモード（消音モード）がオンの場合、正しく動作しないことがあります。",
   },
   en: {
     app_name: "Pitch Checker",
@@ -42,6 +43,7 @@ const I18N = {
     tech_title: "Technologies Used",
     mic_error: "Cannot access microphone. Please check browser settings.",
     mic_prompt: "Please allow microphone access",
+    silent_mode_warning: "Note: On iPhone, this may not work correctly if silent mode (mute switch) is on.",
   }
 };
 
