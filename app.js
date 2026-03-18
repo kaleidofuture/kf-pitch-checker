@@ -24,6 +24,18 @@ const I18N = {
     mic_error: "マイクにアクセスできません。ブラウザの設定を確認してください。",
     mic_prompt: "マイクへのアクセスを許可してください",
     silent_mode_warning: "※ iPhoneのマナーモード（消音モード）がオンの場合、正しく動作しないことがあります。",
+    play_reference: "基準音を鳴らす",
+    stop_reference: "基準音を停止",
+    direction_sharp: "高い",
+    direction_flat: "低い",
+    direction_in_tune: "正確",
+    instrument_preset: "楽器プリセット",
+    preset_custom: "カスタム",
+    preset_clarinet_bb: "Bbクラリネット",
+    preset_trumpet: "トランペット",
+    preset_flute: "フルート",
+    preset_oboe: "オーボエ",
+    preset_tuba: "チューバ",
   },
   en: {
     app_name: "Pitch Checker",
@@ -44,6 +56,18 @@ const I18N = {
     mic_error: "Cannot access microphone. Please check browser settings.",
     mic_prompt: "Please allow microphone access",
     silent_mode_warning: "Note: On iPhone, this may not work correctly if silent mode (mute switch) is on.",
+    play_reference: "Play Reference Tone",
+    stop_reference: "Stop Reference Tone",
+    direction_sharp: "Sharp",
+    direction_flat: "Flat",
+    direction_in_tune: "In Tune",
+    instrument_preset: "Instrument Preset",
+    preset_custom: "Custom",
+    preset_clarinet_bb: "Bb Clarinet",
+    preset_trumpet: "Trumpet",
+    preset_flute: "Flute",
+    preset_oboe: "Oboe",
+    preset_tuba: "Tuba",
   }
 };
 
@@ -70,6 +94,33 @@ function applyI18n() {
   if (btn) {
     btn.querySelector("span").textContent = isListening ? t("stop") : t("start");
   }
+  // Update reference tone button text
+  const refBtn = document.getElementById("ref-tone-btn");
+  if (refBtn) {
+    refBtn.textContent = isPlayingRefTone ? t("stop_reference") : t("play_reference");
+  }
+  // Update direction indicator
+  updateDirectionIndicator(lastDetectedCents);
+}
+
+// --- Instrument Presets ---
+const INSTRUMENT_PRESETS = {
+  custom: { freq: null },
+  clarinet_bb: { freq: 466.16 },
+  trumpet: { freq: 466.16 },
+  flute: { freq: 440 },
+  oboe: { freq: 440 },
+  tuba: { freq: 440 },
+};
+
+function selectPreset(presetKey) {
+  const preset = INSTRUMENT_PRESETS[presetKey];
+  if (preset && preset.freq !== null) {
+    referenceA4 = preset.freq;
+    document.getElementById("reference-value").textContent = referenceA4;
+    // Stop reference tone if playing (frequency changed)
+    if (isPlayingRefTone) stopReferenceTone();
+  }
 }
 
 // --- Note names & frequencies ---
@@ -93,6 +144,96 @@ function frequencyToNote(freq) {
 function adjustReference(delta) {
   referenceA4 = Math.max(400, Math.min(480, referenceA4 + delta));
   document.getElementById("reference-value").textContent = referenceA4;
+  // Reset preset selector to custom
+  const presetSelect = document.getElementById("preset-select");
+  if (presetSelect) presetSelect.value = "custom";
+  // If reference tone is playing, update its frequency
+  if (isPlayingRefTone) {
+    stopReferenceTone();
+    startReferenceTone();
+  }
+}
+
+// --- Reference Tone (OscillatorNode) ---
+let refToneContext = null;
+let refToneOscillator = null;
+let refToneGain = null;
+let isPlayingRefTone = false;
+
+function toggleReferenceTone() {
+  if (isPlayingRefTone) {
+    stopReferenceTone();
+  } else {
+    startReferenceTone();
+  }
+}
+
+function startReferenceTone() {
+  refToneContext = new (window.AudioContext || window.webkitAudioContext)();
+  refToneOscillator = refToneContext.createOscillator();
+  refToneGain = refToneContext.createGain();
+
+  refToneOscillator.type = "sine";
+  refToneOscillator.frequency.value = referenceA4;
+  refToneGain.gain.value = 0.3;
+
+  refToneOscillator.connect(refToneGain);
+  refToneGain.connect(refToneContext.destination);
+  refToneOscillator.start();
+
+  isPlayingRefTone = true;
+  const btn = document.getElementById("ref-tone-btn");
+  btn.textContent = t("stop_reference");
+  btn.classList.remove("btn-outline");
+  btn.classList.add("btn-stop");
+}
+
+function stopReferenceTone() {
+  if (refToneOscillator) {
+    refToneOscillator.stop();
+    refToneOscillator = null;
+  }
+  if (refToneContext) {
+    refToneContext.close();
+    refToneContext = null;
+  }
+  isPlayingRefTone = false;
+  const btn = document.getElementById("ref-tone-btn");
+  btn.textContent = t("play_reference");
+  btn.classList.remove("btn-stop");
+  btn.classList.add("btn-outline");
+}
+
+// --- Direction Indicator ---
+let lastDetectedCents = 0;
+
+function updateDirectionIndicator(cents) {
+  lastDetectedCents = cents;
+  const arrowEl = document.getElementById("direction-arrow");
+  const labelEl = document.getElementById("direction-label");
+  if (!arrowEl || !labelEl) return;
+
+  const absCents = Math.abs(cents);
+
+  if (absCents <= 5) {
+    // In tune
+    arrowEl.textContent = "●";
+    arrowEl.style.color = "#27ae60";
+    labelEl.textContent = t("direction_in_tune");
+    labelEl.style.color = "#27ae60";
+  } else if (cents > 0) {
+    // Sharp (too high)
+    arrowEl.textContent = "↑";
+    arrowEl.style.color = "#e74c3c";
+    labelEl.textContent = t("direction_sharp");
+    labelEl.style.color = "#e74c3c";
+  } else {
+    // Flat (too low)
+    arrowEl.textContent = "↓";
+    arrowEl.style.color = "#3498db";
+    labelEl.textContent = t("direction_flat");
+    labelEl.style.color = "#3498db";
+  }
 }
 
 // --- Autocorrelation Pitch Detection ---
@@ -273,6 +414,9 @@ function updateDisplay(note) {
   } else {
     noteName.style.color = "#e74c3c";
   }
+
+  // Update direction indicator
+  updateDirectionIndicator(note.cents);
 }
 
 function updateSessionDuration() {
